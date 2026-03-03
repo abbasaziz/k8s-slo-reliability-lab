@@ -52,3 +52,5 @@ On push to main:
 2. CPU-based HPA does not understand business health
 3. Multi-window burn rate alerts detect reliability risk early
 4. Recording rules optimize Prometheus performance
+
+[![Build and Push Docker Image](https://github.com/abbasaziz/k8s-slo-reliability-lab/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/abbasaziz/k8s-slo-reliability-lab/actions/workflows/ci.yaml)
