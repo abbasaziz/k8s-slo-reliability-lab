@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slo-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: slo-alerts
+    rules:
+
+    - alert: FastErrorBudgetBurn
+      expr: app:burn_rate:5m > 2
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Fast burn rate detected (>2x budget)"
+
+    - alert: SlowErrorBudgetBurn
+      expr: app:burn_rate:1h > 1
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Sustained burn rate detected"
+
+    - alert: HighLatencyP95
+      expr: app:latency:p95 > 0.3
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "P95 latency above 300ms"

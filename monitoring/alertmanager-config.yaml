@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: reliability-routing
+  namespace: monitoring
+  labels:
+    release: monitoring # CRITICAL: Must match your prometheus release label
+spec:
+  route:
+    receiver: 'slack-notifications'
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    groupBy: ['alertname', 'severity']
+  
+  receivers:
+  - name: 'slack-notifications'
+    slackConfigs:
+    - apiURL:
+        name: alertmanager-slack-webhook
+        key: webhook-url
+      channel: '#reliability-alerts'
+      sendResolved: true
+      # This template builds the rich message you see in Slack
+      title: '{{ if eq .Status "firing" }}🔥{{ else }}✅{{ end }} [{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+      # Use the "|" to preserve the lines below
+      text: |
+        *Severity:* `{{ .CommonLabels.severity | toUpper }}`
+        *Description:* {{ .CommonAnnotations.summary }}
+        *Cluster:* `ai-cluster`
+        *Namespace:* `{{ .CommonLabels.namespace }}`
+        *Runbook:* <https://github.com/abbasaziz/k8s-slo-reliability-lab|View Remediation Steps>

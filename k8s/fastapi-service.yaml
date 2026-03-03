@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi
+  namespace: reliability-lab
+  labels:
+    app: fastapi
+spec:
+  selector:
+    app: fastapi
+  ports:
+  - port: 80
+    targetPort: 8000
+    name: http

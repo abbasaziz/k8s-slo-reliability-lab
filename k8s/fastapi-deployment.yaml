@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi
+  namespace: reliability-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+      - name: fastapi
+        image: abbasaziz/fastapi-slo:53dc1c827b72e0ba87eac61a7ceb4689612a7e28
+        ports:
+        - containerPort: 8000
+        env:
+        - name: POSTGRES_DB
+          value: testdb
+        - name: POSTGRES_USER
+          value: testuser
+        - name: POSTGRES_PASSWORD
+          value: testpass
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: "100m"     # 100 milli-cores (0.1 CPU)
+            memory: "128Mi"
+          limits:
+            cpu: "500m"     # Allow bursting
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi
+  namespace: reliability-lab
+  labels:
+    app: fastapi
+spec:
+  selector:
+    app: fastapi
+  ports:
+  - port: 80
+    targetPort: 8000
+    name: http

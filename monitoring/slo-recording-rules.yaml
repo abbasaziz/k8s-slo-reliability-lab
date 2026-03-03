@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slo-recording-rules
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: slo-recordings
+    rules:
+
+    # Availability Error Rate (5m window)
+    - record: app:error_rate:5m
+      expr: |
+        sum(rate(app_requests_total{status=~"5.."}[5m]))
+        /
+        sum(rate(app_requests_total[5m]))
+
+    # Availability Error Rate (1h window)
+    - record: app:error_rate:1h
+      expr: |
+        sum(rate(app_requests_total{status=~"5.."}[1h]))
+        /
+        sum(rate(app_requests_total[1h]))
+
+    # Burn Rate (5m fast window)
+    - record: app:burn_rate:5m
+      expr: app:error_rate:5m / 0.01
+
+    # Burn Rate (1h slow window)
+    - record: app:burn_rate:1h
+      expr: app:error_rate:1h / 0.01
+
+    # P95 Latency
+    - record: app:latency:p95
+      expr: |
+        histogram_quantile(
+          0.95,
+          sum(rate(app_request_latency_seconds_bucket[5m])) by (le)
+        )
