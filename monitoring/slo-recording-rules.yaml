@@ -34,4 +34,4 @@ spec:
   - name: traffic-metrics
     rules:
     - record: app:qps
-      expr: sum(rate(app_requests_total[1m]))
+      expr: sum(rate(app_requests_total[1m])) by (pod, namespace) # <--- ADD THIS
