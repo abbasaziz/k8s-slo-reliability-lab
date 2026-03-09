@@ -7,35 +7,31 @@ metadata:
     release: monitoring
 spec:
   groups:
-  - name: slo-recordings
+  - name: slo-recordings-5m-1h
     rules:
-
     # Availability Error Rate (5m window)
     - record: app:error_rate:5m
-      expr: |
-        sum(rate(app_requests_total{status=~"5.."}[5m]))
-        /
-        sum(rate(app_requests_total[5m]))
-
-    # Availability Error Rate (1h window)
-    - record: app:error_rate:1h
-      expr: |
-        sum(rate(app_requests_total{status=~"5.."}[1h]))
-        /
-        sum(rate(app_requests_total[1h]))
+      expr: sum(rate(app_requests_total{status=~"5.."}[5m])) / sum(rate(app_requests_total[5m]))
 
     # Burn Rate (5m fast window)
     - record: app:burn_rate:5m
       expr: app:error_rate:5m / 0.01
 
-    # Burn Rate (1h slow window)
-    - record: app:burn_rate:1h
-      expr: app:error_rate:1h / 0.01
-
-    # P95 Latency
-    - record: app:latency:p95
+  - name: slo-advanced-30d
+    rules:
+    # 30-day rolling Error Ratio
+    - record: app:error_ratio:30d
       expr: |
-        histogram_quantile(
-          0.95,
-          sum(rate(app_request_latency_seconds_bucket[5m])) by (le)
-        )
+        sum(rate(app_requests_total{status=~"5.."}[30d]))
+        /
+        sum(rate(app_requests_total[30d]))
+
+    # Budget Remaining (1.0 = 100% budget, 0.0 = Empty)
+    - record: app:error_budget_remaining:30d
+      expr: (0.01 - app:error_ratio:30d) / 0.01
+
+
+  - name: traffic-metrics
+    rules:
+    - record: app:qps
+      expr: sum(rate(app_requests_total[1m]))
