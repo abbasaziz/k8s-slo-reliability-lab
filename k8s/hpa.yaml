@@ -9,7 +9,7 @@ spec:
     kind: Deployment
     name: fastapi
   minReplicas: 2
-  maxReplicas: 6
+  maxReplicas: 10
   metrics:
   - type: Resource
     resource:
@@ -17,3 +17,10 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
+  - type: Pods
+    pods:
+      metric:
+        name: app:qps  # Ensure this matches your recording rule EXACTLY
+      target: 
+        type: AverageValue
+        averageValue: 10
