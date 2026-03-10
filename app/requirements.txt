@@ -3,3 +3,7 @@ uvicorn
 psycopg2-binary
 prometheus_client
 sqlalchemy
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-exporter-jaeger

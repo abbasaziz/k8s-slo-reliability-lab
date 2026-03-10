@@ -5,9 +5,26 @@ import threading
 import time
 from prometheus_client import Counter, Histogram, generate_latest
 from fastapi.responses import Response
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+# 1. Setup the Tracer
+provider = TracerProvider()
+# Point this to the Jaeger agent we just deployed in K8s
+jaeger_exporter = JaegerExporter(
+    agent_host_name="reliability-jaeger-agent.observability.svc.cluster.local",
+    agent_port=6831,
+)
+provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
+trace.set_tracer_provider(provider)
+
+# 2. Instrument the App (After creating the FastAPI 'app' object)
+# FastAPIInstrumentor.instrument_app(app) # Run this after app = FastAPI()
 app = FastAPI()
-
+FastAPIInstrumentor.instrument_app(app)
 # Global state to track DB health
 db_connected = False
 
