@@ -12,10 +12,14 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 # 1. Setup the Tracer
-provider = TracerProvider()
+resource = Resource(attributes={
+    SERVICE_NAME: "fastapi-service"
+})
+
+provider = TracerProvider(resource=resource)
 # Point this to the Jaeger agent we just deployed in K8s
 jaeger_exporter = JaegerExporter(
-    agent_host_name="reliability-jaeger-agent.observability.svc.cluster.local",
+    agent_host_name="reliability-jaeger-agent.observability",
     agent_port=6831,
 )
 provider.add_span_processor(BatchSpanProcessor(jaeger_exporter))
