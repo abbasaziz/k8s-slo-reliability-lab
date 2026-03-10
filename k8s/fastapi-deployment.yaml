@@ -19,6 +19,10 @@ spec:
         ports:
         - containerPort: 8000
         env:
+        - name: OTEL_PYTHON_LOG_LEVEL
+          value: "debug"
+        - name: OTEL_LOG_LEVEL
+          value: "debug"
         - name: POSTGRES_DB
           value: testdb
         - name: POSTGRES_USER

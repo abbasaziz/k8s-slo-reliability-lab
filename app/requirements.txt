@@ -6,4 +6,4 @@ sqlalchemy
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
-opentelemetry-exporter-jaeger
+opentelemetry-exporter-otlp
