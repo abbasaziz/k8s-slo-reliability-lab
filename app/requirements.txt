@@ -1,8 +1,7 @@
 fastapi
 uvicorn
 psycopg2-binary
-prometheus_client
-sqlalchemy
+prometheus-client
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation-fastapi

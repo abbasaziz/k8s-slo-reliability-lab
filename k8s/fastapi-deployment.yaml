@@ -21,8 +21,10 @@ spec:
         env:
         - name: OTEL_PYTHON_LOG_LEVEL
           value: "debug"
-        - name: OTEL_LOG_LEVEL
-          value: "debug"
+        - name: OTEL_TRACES_EXPORTER
+          value: "otlp"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://reliability-jaeger-collector.observability.svc.cluster.local:4318"
         - name: POSTGRES_DB
           value: testdb
         - name: POSTGRES_USER

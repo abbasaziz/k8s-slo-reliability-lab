@@ -9,6 +9,7 @@ from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
     
@@ -107,5 +108,8 @@ def metrics():
 
 @app.get("/stress")
 def stress():
-    total = sum(range(10_000_000))
-    return {"done": total}
+    # This manually starts a trace
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span("manual-stress-task"):
+        total = sum(range(10_000_000))
+        return {"done": total}
