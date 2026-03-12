@@ -23,6 +23,19 @@ from prometheus_client import Counter, Histogram, generate_latest
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
+# 1. Identity
+resource = Resource.create({SERVICE_NAME: "fastapi-service"})
+provider = TracerProvider(resource=resource)
+
+# 2. Exporters
+otlp_exporter = OTLPSpanExporter(endpoint="http://reliability-jaeger-collector.observability.svc.cluster.local:4318/v1/traces")
+provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
+provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+
+# 3. Set Global Provider
+trace.set_tracer_provider(provider)
+
 # --- METRICS DEFINITIONS ---
 REQUEST_COUNT = Counter(
     "app_requests_total",
@@ -39,6 +52,8 @@ REQUEST_LATENCY = Histogram(
 
 # --- APP INITIALIZATION ---
 app = FastAPI(title="Reliability Lab - Tracing & SLOs")
+
+FastAPIInstrumentor.instrument_app(app)
 
 # Global state for background DB checker
 db_connected = False
@@ -64,38 +79,9 @@ def check_db_connectivity():
 
 @app.on_event("startup")
 def startup_event():
-    """
-    Everything inside here runs once the Uvicorn worker is ready.
-    This is the most reliable place to initialize Tracing.
-    """
-    # 1. Resource Identity: How this app appears in Jaeger
-    resource = Resource.create({SERVICE_NAME: "fastapi-service"})
-    
-    # 2. Tracer Provider: The 'Brain' of the operation
-    provider = TracerProvider(resource=resource)
-    
-    # 3. Console Exporter: FOR DEBUGGING ONLY. 
-    # This prints every trace to your 'kubectl logs' so you can verify it works locally.
-    console_processor = SimpleSpanProcessor(ConsoleSpanExporter())
-    provider.add_span_processor(console_processor)
-    
-    # 4. OTLP HTTP Exporter: Sends data to the Jaeger Collector in the 'observability' namespace
-    otlp_exporter = OTLPSpanExporter(
-        endpoint="http://reliability-jaeger-collector.observability.svc.cluster.local:4318/v1/traces"
-    )
-    otlp_processor = SimpleSpanProcessor(otlp_exporter)
-    provider.add_span_processor(otlp_processor)
-    
-    # 5. Global Set: Tell the system to use this provider
-    trace.set_tracer_provider(provider)
-    
-    # 6. Middleware Auto-Instrumentation: Automatically trace all FastAPI routes
-    FastAPIInstrumentor.instrument_app(app)
-
-    # 7. Start the background health checker
     thread = threading.Thread(target=check_db_connectivity, daemon=True)
     thread.start()
-    logger.info("Application startup and Instrumentation complete.")
+    logger.info("Background tasks started.")
 
 # --- MIDDLEWARE ---
 @app.middleware("http")
