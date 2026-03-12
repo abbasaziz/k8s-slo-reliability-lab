@@ -9,26 +9,27 @@ from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
 
 # ---- Tracing Setup ----
 
-resource = Resource(attributes={
+RequestsInstrumentor().instrument()
+resource = Resource.create({
     "service.name": "fastapi-reliability-service"
 })
 
-trace.set_tracer_provider(
-    TracerProvider(resource=resource)
-)
+trace.set_tracer_provider(TracerProvider(resource=resource))
 
-jaeger_exporter = JaegerExporter(
-    agent_host_name="jaeger-agent.observability",
-    agent_port=6831,
-)
+otlp_exporter = OTLPSpanExporter()
 
-span_processor = BatchSpanProcessor(jaeger_exporter)
+span_processor = BatchSpanProcessor(otlp_exporter)
+
 trace.get_tracer_provider().add_span_processor(span_processor)
+
+
 
 app = FastAPI()
 

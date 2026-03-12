@@ -4,7 +4,7 @@ metadata:
   name: fastapi
   namespace: reliability-lab
 spec:
-  replicas: 2
+  # replicas: 2
   selector:
     matchLabels:
       app: fastapi
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: fastapi
-        image: abbasaziz/fastapi-slo:53dc1c827b72e0ba87eac61a7ceb4689612a7e28
+        image: abbasaziz/fastapi-slo:latest
         ports:
         - containerPort: 8000
         env:
@@ -23,8 +23,12 @@ spec:
           value: "debug"
         - name: OTEL_TRACES_EXPORTER
           value: "otlp"
+        # We point to the OTLP HTTP port (4318)
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "http://reliability-jaeger-collector.observability.svc.cluster.local:4318"
+        # CRITICAL: Tell the SDK to use HTTP/Protobuf, not gRPC
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: "http/protobuf"
         - name: POSTGRES_DB
           value: testdb
         - name: POSTGRES_USER
@@ -50,18 +54,3 @@ spec:
           limits:
             cpu: "500m"     # Allow bursting
             memory: "256Mi"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: fastapi
-  namespace: reliability-lab
-  labels:
-    app: fastapi
-spec:
-  selector:
-    app: fastapi
-  ports:
-  - port: 80
-    targetPort: 8000
-    name: http
