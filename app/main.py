@@ -6,26 +6,31 @@ import time
 from prometheus_client import Counter, Histogram, generate_latest
 from fastapi.responses import Response
 from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-    
-# 1. Setup the Tracer
+
+# ---- Tracing Setup ----
+
 resource = Resource(attributes={
-    SERVICE_NAME: "fastapi-service"
+    "service.name": "fastapi-reliability-service"
 })
-otlp_exporter = OTLPSpanExporter(
-    endpoint="http://reliability-jaeger-collector.observability.svc.cluster.local:4318/v1/traces"
+
+trace.set_tracer_provider(
+    TracerProvider(resource=resource)
 )
-provider = TracerProvider(resource=resource)
-provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
-trace.set_tracer_provider(provider)
+
+jaeger_exporter = JaegerExporter(
+    agent_host_name="jaeger-agent.observability",
+    agent_port=6831,
+)
+
+span_processor = BatchSpanProcessor(jaeger_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 app = FastAPI()
-
 
 FastAPIInstrumentor.instrument_app(app)
 
