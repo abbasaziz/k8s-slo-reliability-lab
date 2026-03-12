@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: fastapi
-        image: abbasaziz/fastapi-slo:53dc1c827b72e0ba87eac61a7ceb4689612a7e28
+        image: abbasaziz/fastapi-slo:trace-test
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         env:
