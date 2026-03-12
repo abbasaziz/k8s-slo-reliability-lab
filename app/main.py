@@ -23,7 +23,9 @@ resource = Resource.create({
 
 trace.set_tracer_provider(TracerProvider(resource=resource))
 
-otlp_exporter = OTLPSpanExporter()
+otlp_exporter = OTLPSpanExporter(
+    endpoint="http://reliability-jaeger-collector.observability.svc.cluster.local:4318/v1/traces"
+)
 
 span_processor = BatchSpanProcessor(otlp_exporter)
 
