@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-only-from-fastapi
+  namespace: reliability-lab
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres # The target
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: fastapi # The only allowed source
+    ports:
+    - protocol: TCP
+      port: 5432
