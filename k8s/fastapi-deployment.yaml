@@ -28,7 +28,7 @@ spec:
       containers:
       - name: fastapi
         image: abbasaziz/fastapi-slo:trace-test
-        command: ["/bin/sh", "-c"]
+        command: ["sh", "-c"]
         args: ["source /vault/secrets/db-config && python main.py"]
         imagePullPolicy: Always
         ports:
