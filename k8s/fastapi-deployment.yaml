@@ -14,15 +14,15 @@ spec:
       labels:
         app: fastapi
       annotations:
-      vault.hashicorp.com/agent-inject: "true"
-      vault.hashicorp.com/role: "fastapi-role"
-      vault.hashicorp.com/agent-inject-secret-db-config: "secret/data/db-pass"
-      # This template formats the secret into a file the app can read
-      vault.hashicorp.com/agent-inject-template-db-config: |
-        {{- with secret "secret/data/db-pass" -}}
-        export POSTGRES_PASSWORD="{{ .Data.data.password }}"
-        export POSTGRES_USER="{{ .Data.data.user }}"
-        {{- end -}}
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "fastapi-role"
+        vault.hashicorp.com/agent-inject-secret-db-config: "secret/data/db-pass"
+        # This template formats the secret into a file the app can read
+        vault.hashicorp.com/agent-inject-template-db-config: |
+          {{- with secret "secret/data/db-pass" -}}
+          export POSTGRES_PASSWORD="{{ .Data.data.password }}"
+          export POSTGRES_USER="{{ .Data.data.user }}"
+          {{- end -}}
     spec:
       serviceAccountName: fastapi-sa
       containers:
