@@ -130,3 +130,7 @@ def stress():
     with tracer.start_as_current_span("heavy-calculation-task"):
         total = sum(range(10_000_000))
         return {"done": total, "result": "Calculated 10M sum"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
