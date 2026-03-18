@@ -4,8 +4,13 @@ metadata:
   name: fastapi-ingress
   namespace: reliability-lab
   annotations:
+    cert-manager.io/issuer: "selfsigned-issuer" # Tell it to use our ID machine
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  tls:
+  - hosts:
+    - api.reliability.lab
+    secretName: fastapi-tls-secret # Where the 'Safe' key is stored
   rules:
   - host: api.reliability.lab
     http:
