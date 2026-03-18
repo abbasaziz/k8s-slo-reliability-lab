@@ -40,6 +40,9 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
+        env:
+        - name: OTEL_PYTHON_LOG_LEVEL
+          value: "debug"
         livenessProbe:
           httpGet:
             path: /live
