@@ -29,15 +29,18 @@ spec:
       containers:
       - name: fastapi
         image: abbasaziz/fastapi-slo:trace-test
-        command: ["/bin/sh"]
+        command: ["/bin/sh", "-c"]
         args:
-          - "-c"
           - |
             sleep 2;
-            . /vault/secrets/db-config;
-            # DEBUG: This will print 'testuser' to logs so we know Vault worked
-            echo "Starting app with user: $POSTGRES_USER"; 
-            python main.py 
+            if [ -f /vault/secrets/db-config ]; then
+              . /vault/secrets/db-config;
+              # 'exec' makes Python the main process
+              exec python main.py; 
+            else
+              echo "Vault file missing";
+              exit 1;
+            fi
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
