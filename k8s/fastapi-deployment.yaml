@@ -22,6 +22,7 @@ spec:
           {{- with secret "secret/data/db-pass" -}}
           export POSTGRES_USER="{{ .Data.data.user }}"
           export POSTGRES_PASSWORD="{{ .Data.data.password }}"
+          export POSTGRES_DB="testdb"
           {{- end -}}
     spec:
       serviceAccountName: fastapi-sa
