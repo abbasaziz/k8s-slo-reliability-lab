@@ -20,8 +20,8 @@ spec:
         # This template formats the secret into a file the app can read
         vault.hashicorp.com/agent-inject-template-db-config: |
           {{- with secret "secret/data/db-pass" -}}
-          export POSTGRES_PASSWORD="{{ .Data.data.password }}"
           export POSTGRES_USER="{{ .Data.data.user }}"
+          export POSTGRES_PASSWORD="{{ .Data.data.password }}"
           {{- end -}}
     spec:
       serviceAccountName: fastapi-sa
@@ -32,12 +32,11 @@ spec:
         args:
           - "-c"
           - |
-            # 1. Wait a second for the sidecar to finish writing the file
             sleep 2;
-            # 2. Use '.' instead of 'source' (more compatible with all shells)
             . /vault/secrets/db-config;
-            # 3. Start the app
-            python main.py  
+            # DEBUG: This will print 'testuser' to logs so we know Vault worked
+            echo "Starting app with user: $POSTGRES_USER"; 
+            python main.py 
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
