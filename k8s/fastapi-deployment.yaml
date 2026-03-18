@@ -28,8 +28,16 @@ spec:
       containers:
       - name: fastapi
         image: abbasaziz/fastapi-slo:trace-test
-        command: ["sh", "-c"]
-        args: ["source /vault/secrets/db-config && python main.py"]
+        command: ["/bin/sh"]
+        args:
+          - "-c"
+          - |
+            # 1. Wait a second for the sidecar to finish writing the file
+            sleep 2;
+            # 2. Use '.' instead of 'source' (more compatible with all shells)
+            . /vault/secrets/db-config;
+            # 3. Start the app
+            python main.py  
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
