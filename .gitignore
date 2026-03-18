@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .env
 LICENSE
+lab_summariser.py
+lab_summary.md
